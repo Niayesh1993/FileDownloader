@@ -7,4 +7,6 @@
     <string name="cancel">cancel</string>
     <string name="resume">resume</string>
     <string name="restart">restart</string>
+    <string name="play">play</string>
+    <string name="delete">delete</string>
 </resources>

@@ -1,19 +1,20 @@
 package com.example.filedownlowder
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.downloader.Error
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
 import com.downloader.Status
 import com.example.filedownlowder.utils.Utils
+import java.io.File
+
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -21,9 +22,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     val URL = " https://bit.ly/30aWVDP"
     var Start_btn: Button? = null
     var Cancel_btn: Button? = null
+    var Play_btn: Button? = null
     var Progress_txt: TextView? = null
     var progressBar: ProgressBar? = null
     var downloadId = 0
+    var VideoView: VideoView? = null
+    var Delete_btn: Button? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,8 +42,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         Start_btn!!.setOnClickListener(this)
         Cancel_btn = findViewById(R.id.cancel_btn)
         Cancel_btn!!.setOnClickListener(this)
+        Play_btn = findViewById(R.id.play_btn)
+        Play_btn!!.setOnClickListener(this)
         progressBar = findViewById(R.id.progressBar)
         Progress_txt = findViewById(R.id.textViewProgress)
+        VideoView = findViewById(R.id.videoView)
+        Delete_btn = findViewById(R.id.delete_btn)
+        Delete_btn!!.setOnClickListener(this)
     }
 
     override fun onClick(p0: View?) {
@@ -63,7 +72,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         return
                     }
                     downloadId =
-                        PRDownloader.download(URL, dirPath, "audio")
+                        PRDownloader.download(URL, dirPath, "audio.mp4")
                             .build()
                             .setOnStartOrResumeListener {
                                 progressBar!!.setIndeterminate(false)
@@ -118,6 +127,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 R.id.cancel_btn ->{
                     PRDownloader.cancel(downloadId)
+                }
+                R.id.play_btn ->{
+                    val m = MediaController(this)
+                    VideoView!!.setMediaController(m)
+                    val path = dirPath + "/audio.mp4"
+                    val u: Uri = Uri.parse(path)
+                    VideoView!!.setVideoURI(u)
+
+                    VideoView!!.start()
+                }
+                R.id.delete_btn ->{
+                    val mydir: File = getDir(dirPath, Context.MODE_PRIVATE)
+                    val filePath = File(mydir, "audio.mp4")
+                    val deleted: Boolean = filePath.delete()
                 }
 
             }
