@@ -1,10 +1,10 @@
 package com.example.filedownlowder
 
-import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     var downloadId = 0
     var VideoView: VideoView? = null
     var Delete_btn: Button? = null
+    var File_layout: RelativeLayout? = null
+    var File_name: String = "audio.mp4"
+    var files: Array<File>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +38,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         dirPath = Utils().getRootDirPath(applicationContext)
         initView()
+
+        val directory = File(dirPath)
+        files = directory.listFiles()
+        for (i in files!!.indices) {
+            if (((files as Array<File>)[i].name).equals(File_name)){
+                Start_btn!!.setEnabled(false)
+                Cancel_btn!!.setEnabled(false)
+                Start_btn!!.setText(R.string.completed)
+                File_layout!!.visibility = View.VISIBLE
+            }
+
+        }
     }
 
     private fun initView() {
@@ -49,6 +64,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         VideoView = findViewById(R.id.videoView)
         Delete_btn = findViewById(R.id.delete_btn)
         Delete_btn!!.setOnClickListener(this)
+        File_layout = findViewById(R.id.file_layout)
     }
 
     override fun onClick(p0: View?) {
@@ -57,6 +73,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             when (p0.getId()) {
 
                 R.id.start_btn -> {
+
                     if (Status.RUNNING == PRDownloader.getStatus(downloadId)) {
                         PRDownloader.pause(downloadId)
                         return
@@ -72,7 +89,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                         return
                     }
                     downloadId =
-                        PRDownloader.download(URL, dirPath, "audio.mp4")
+                        PRDownloader.download(URL, dirPath, File_name)
                             .build()
                             .setOnStartOrResumeListener {
                                 progressBar!!.setIndeterminate(false)
@@ -106,6 +123,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                                     Start_btn!!.setEnabled(false)
                                     Cancel_btn!!.setEnabled(false)
                                     Start_btn!!.setText(R.string.completed)
+                                    File_layout!!.visibility = View.VISIBLE
                                 }
 
                                 override fun onError(error: Error) {
@@ -131,16 +149,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 R.id.play_btn ->{
                     val m = MediaController(this)
                     VideoView!!.setMediaController(m)
-                    val path = dirPath + "/audio.mp4"
+                    val path = dirPath + "/"+File_name
                     val u: Uri = Uri.parse(path)
                     VideoView!!.setVideoURI(u)
-
                     VideoView!!.start()
                 }
                 R.id.delete_btn ->{
-                    val mydir: File = getDir(dirPath, Context.MODE_PRIVATE)
-                    val filePath = File(mydir, "audio.mp4")
-                    val deleted: Boolean = filePath.delete()
+                    val path = dirPath + "/"+File_name
+                    val file = File(path)
+                    val deleted: Boolean = file.delete()
                 }
 
             }
